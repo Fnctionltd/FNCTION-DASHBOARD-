@@ -1,73 +1,48 @@
 # FNCTION Dashboard
 
-A single-screen operating view of the business: distribution, finance, manufacturing and marketing,
-all visible without scrolling on a laptop.
+A shared dashboard for Sam and Helen. Both sign in from their own devices, both
+see the same live data, and every change saves as it is made.
 
-It is a static page — no build step, no dependencies, no server required.
+Covers distribution (partners, orders, notes), finance (spending and invoices),
+manufacturing (four suppliers) and marketing (seven channels).
 
-## Running it
+## Setting it up
 
-Open `index.html` in a browser. That's it.
+Setup happens once and takes four short steps. They are written out in
+`SETUP.md` — follow that, not this file.
 
-To serve it locally instead (useful for sharing on a LAN):
+## Running it locally
 
 ```sh
-python3 -m http.server 8000
-# then visit http://localhost:8000
+npm install
+npm run dev
 ```
 
-## Updating the numbers
+Then open http://localhost:3000. It needs `.env.local` to exist first; copy
+`.env.local.example` and fill in the two values from Supabase.
 
-Everything on screen comes from **`data/dashboard.js`**. Edit that one file and refresh — no other
-file needs to change.
+## How it is put together
 
-```js
-{ "label": "Existing Partners", "value": 18 }
-{ "label": "Partner Revenue", "value": 42500, "format": "currency" }
-```
-
-- `"value": null` renders the `£XX,XXX` placeholder, so a figure that hasn't been filled in never
-  reads as a real one. Replace `null` with a plain number (no commas, no `£`) once you have it.
-- `"format": "currency"` prefixes the symbol set in `"currency"` and adds thousands separators.
-- `"tone": "warn"` (amber) or `"tone": "alert"` (red) highlights a metric that needs attention.
-- `"updated"` is the date shown in the header — set it as `YYYY-MM-DD`.
-
-### Statuses
-
-Manufacturing lines and marketing channels each carry a `"status"` string, and the colour of its
-dot comes from the `statusTones` map at the bottom of the data file:
-
-| Tone | Colour | Meaning | Current statuses |
-| --- | --- | --- | --- |
-| `live` | green | on track / in flight | Active, Production, In Production, Ordered |
-| `progress` | amber | moving, not finished | Shipping, Sampling, Reformulation, Planning, Drafting |
-| `blocked` | red | waiting on someone | Awaiting Quote, Need Follow-Up |
-
-A status with no entry in the map still renders — it just gets a neutral grey dot. Add it to
-`statusTones` to give it a colour.
-
-### Adding a supplier or channel
-
-Append to the relevant array in `data/dashboard.js`:
-
-```js
-// a new manufacturing supplier
-{ "name": "New Supplier", "lines": [ { "label": "Product", "status": "Sampling" } ] }
-
-// a new marketing channel
-{ "label": "Pinterest", "status": "Planning" }
-```
-
-The layout reflows on its own.
-
-## Layout
-
-| File | Purpose |
+| Folder | What is in it |
 | --- | --- |
-| `index.html` | Page shell — masthead, empty `<main>`, legend |
-| `data/dashboard.js` | All content and figures |
-| `assets/dashboard.js` | Renders the data into the page; theme toggle |
-| `assets/styles.css` | Styling, dark and light palettes, print rules |
+| `app/` | Pages: the dashboard, the login screen, sign-out |
+| `components/` | The four sections and the shared pieces they are built from |
+| `components/store.tsx` | Loads, saves and live-syncs the data |
+| `lib/` | Supabase connection, formatting, status colours |
+| `supabase/setup.sql` | The one-time database setup |
 
-Dark by default, follows the OS preference on first visit, and the toggle in the header is
-remembered per browser. The page prints cleanly to one sheet.
+Built with Next.js, TypeScript, Tailwind and Supabase. Deploys to Vercel as-is.
+
+## Notes for whoever works on this next
+
+- **Money is stored in pence**, as whole numbers. Pounds only exist for display
+  and typing. Keep it that way; floating point pounds drift on totals.
+- **Invoice status is derived**, not stored. An unpaid invoice becomes overdue
+  on its own once `due_on` passes, with no scheduled job.
+- **Statuses are free text.** `lib/status.ts` maps them to colours and anything
+  unrecognised shows neutral grey, so a new status never needs a code change.
+- **Access is enforced in the database**, not the app. Row level security means
+  the browser key can only ever read what a signed-in user is allowed to read,
+  and an email allowlist means only the two addresses can hold an account.
+- **Do not put the Supabase `service_role` key in this project.** Nothing here
+  needs it and it bypasses every rule above.

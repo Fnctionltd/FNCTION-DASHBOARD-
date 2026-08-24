@@ -1,5 +1,10 @@
--- FNCTION Dashboard V1 — schema, row level security, realtime.
--- Run once in the Supabase SQL Editor. Safe to re-run: every statement guards itself.
+-- =====================================================================
+--  FNCTION Dashboard — one-time database setup
+--
+--  Paste this whole file into the Supabase SQL Editor and press Run.
+--  You only ever need to do this once. Running it twice is harmless.
+-- =====================================================================
+
 
 create extension if not exists pgcrypto;
 
@@ -299,3 +304,62 @@ begin
     end;
   end loop;
 end $$;
+
+-- ---------------------------------------------------------------------------
+-- Only these two email addresses can ever have an account. This is enforced in
+-- the database, so no dashboard setting has to be changed to keep the app
+-- private, and it cannot be bypassed from the browser.
+-- ---------------------------------------------------------------------------
+
+create or replace function public.enforce_email_allowlist()
+returns trigger language plpgsql security definer set search_path = '' as $$
+begin
+  if lower(new.email) not in ('sam@fnction.co', 'helen@fnction.co') then
+    raise exception 'This dashboard is private. % is not an allowed address.', new.email;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists enforce_email_allowlist on auth.users;
+create trigger enforce_email_allowlist
+  before insert on auth.users
+  for each row execute function public.enforce_email_allowlist();
+
+
+-- ---------------------------------------------------------------------------
+-- The fixed manufacturing and marketing rows from the dashboard. Existing rows
+-- are left alone, so re-running this never overwrites a status you have
+-- since changed in the app.
+-- ---------------------------------------------------------------------------
+insert into public.manufacturing_suppliers (name, sort_order) values
+  ('MP Bioscience', 1),
+  ('Bakpac',        2),
+  ('Tiny Box',      3),
+  ('China',         4)
+on conflict (name) do nothing;
+
+insert into public.manufacturing_items (supplier_id, name, status, sort_order)
+select s.id, i.name, i.status, i.sort_order
+from (values
+  ('MP Bioscience', 'CALM',         'Reformulation',  1),
+  ('MP Bioscience', 'CHARGE',       'Sampling',       2),
+  ('Bakpac',        'Sachets',      'Production',     1),
+  ('Bakpac',        'Pouches',      'Awaiting Quote', 2),
+  ('Tiny Box',      'CALM 15 Day',  'Ordered',        1),
+  ('Tiny Box',      'CALM 30 Day',  'In Production',  2),
+  ('China',         'Frothers',     'Shipping',       1),
+  ('China',         'Eye Masks',    'Sampling',       2)
+) as i(supplier, name, status, sort_order)
+join public.manufacturing_suppliers s on s.name = i.supplier
+on conflict (supplier_id, name) do nothing;
+
+insert into public.marketing_channels (name, status, sort_order) values
+  ('Instagram',      'Active',       1),
+  ('Meta Ads',       'Active',       2),
+  ('YouTube',        'Planning',     3),
+  ('TikTok',         'Active',       4),
+  ('Post Schedule',  '6 Scheduled',  5),
+  ('Text Message',   'Drafting',     6),
+  ('Email Campaign', 'Drafting',     7)
+on conflict (name) do nothing;

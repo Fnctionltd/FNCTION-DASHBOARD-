@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+/* Design tokens carried over from the original dashboard, so the look is
+   unchanged: same palette, same mono/sans pairing, same status colours. */
+@theme {
+  --color-bg: #0b0d10;
+  --color-surface: #12151a;
+  --color-surface-2: #171b21;
+  --color-line: #232830;
+  --color-line-soft: #1b2027;
+  --color-ink: #e9e7e2;
+  --color-ink-dim: #9aa1ac;
+  --color-ink-faint: #616873;
+
+  --color-live: #4ba883;
+  --color-progress: #d9a441;
+  --color-blocked: #d4674f;
+
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+html[data-theme="light"] {
+  --color-bg: #f6f4f0;
+  --color-surface: #ffffff;
+  --color-surface-2: #faf8f5;
+  --color-line: #e2ddd4;
+  --color-line-soft: #ece7de;
+  --color-ink: #17191d;
+  --color-ink-dim: #5c626c;
+  --color-ink-faint: #8d939d;
+
+  --color-live: #2f7d5d;
+  --color-progress: #a9761c;
+  --color-blocked: #b2452c;
+}
+
+/* These belong in @layer base. Unlayered rules outrank every layered utility
+   in the cascade, so an unlayered `color` here would silently defeat each
+   text-colour class Tailwind generates. */
+@layer base {
+  html, body {
+    background: var(--color-bg);
+    color: var(--color-ink);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::placeholder { color: var(--color-ink-faint); }
+
+  *:focus-visible {
+    outline: 2px solid var(--color-ink-dim);
+    outline-offset: 1px;
+    border-radius: 4px;
+  }
+}
