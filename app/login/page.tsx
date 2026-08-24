@@ -1,13 +1,33 @@
-import { LoginForm } from "@/components/login-form";
-import { isSupabaseConfigured } from "@/lib/env";
-import { SetupNotice } from "@/components/setup-notice";
+"use client";
 
-// Rendered per request so the configured/not-configured check reflects the
-// live environment rather than whatever was true at build time.
-export const dynamic = "force-dynamic";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { readConfig } from "@/lib/config";
+import { LoginForm } from "@/components/login-form";
+import { SetupNotice } from "@/components/setup-notice";
+import { Splash } from "@/components/splash";
 
 export default function LoginPage() {
-  if (!isSupabaseConfigured()) return <SetupNotice />;
+  const router = useRouter();
+  const [phase, setPhase] = useState<"checking" | "unconfigured" | "form">("checking");
+
+  useEffect(() => {
+    if (!readConfig()) {
+      setPhase("unconfigured");
+      return;
+    }
+    // Someone already signed in on this device goes straight through.
+    createClient()
+      .auth.getSession()
+      .then(({ data: { session } }) => {
+        if (session) router.replace("/");
+        else setPhase("form");
+      });
+  }, [router]);
+
+  if (phase === "checking") return <Splash>Checking your sign-in…</Splash>;
+  if (phase === "unconfigured") return <SetupNotice />;
 
   return (
     <main className="flex min-h-screen items-center justify-center px-6">

@@ -5,6 +5,20 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { inputClass } from "@/components/ui";
 
+/** Turns the library's wording into something a non-developer can act on. */
+function friendlyError(message: string): string {
+  if (message === "Invalid login credentials") {
+    return "That email and password did not match. Check for typos, or reset the password in Supabase.";
+  }
+  if (/failed to fetch|network|load failed/i.test(message)) {
+    return "Could not reach the database. Check your internet connection — if that is fine, the connection settings may be wrong.";
+  }
+  if (/email not confirmed/i.test(message)) {
+    return "That account has not been confirmed yet. In Supabase, open the user and confirm their email.";
+  }
+  return message;
+}
+
 export function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -24,18 +38,12 @@ export function LoginForm() {
     });
 
     if (error) {
-      setError(
-        error.message === "Invalid login credentials"
-          ? "That email and password did not match. Check for typos, or ask Sam to reset it."
-          : error.message
-      );
+      setError(friendlyError(error.message));
       setBusy(false);
       return;
     }
 
-    // refresh() lets the server components re-run with the new session cookie.
     router.replace("/");
-    router.refresh();
   };
 
   return (

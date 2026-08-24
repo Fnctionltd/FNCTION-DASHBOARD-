@@ -6,6 +6,7 @@ import { Finance } from "@/components/sections/finance";
 import { Manufacturing } from "@/components/sections/manufacturing";
 import { Marketing } from "@/components/sections/marketing";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SignOutButton } from "@/components/sign-out-button";
 import type { DashboardData } from "@/lib/types";
 
 export function Dashboard({
@@ -36,14 +37,7 @@ function Shell({ userName }: { userName: string }) {
           <SaveIndicator state={saveState} />
           <span className="font-mono text-xs text-ink-faint">{userName}</span>
           <ThemeToggle />
-          <form action="/auth/sign-out" method="post">
-            <button
-              type="submit"
-              className="rounded-full border border-line px-3 py-1.5 font-mono text-xs uppercase tracking-[0.08em] text-ink-dim hover:border-ink-faint hover:text-ink"
-            >
-              Sign out
-            </button>
-          </form>
+          <SignOutButton />
         </div>
       </header>
 

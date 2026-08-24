@@ -1,0 +1,56 @@
+name: Deploy dashboard to GitHub Pages
+
+on:
+  push:
+    branches: [claude/fnction-business-dashboard-6sdlkm]
+  # Lets the site be redeployed from the Actions tab without a code change.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys run at once, but let a queued one finish rather than
+# cancelling it, so the last push always ends up live.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Turn on GitHub Pages for this repository
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - run: npm ci
+
+      - name: Build the static site
+        run: npm run build
+        env:
+          # A project Pages site is served from /<repo>/, not the domain root.
+          NEXT_PUBLIC_BASE_PATH: /FNCTION-DASHBOARD-
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
