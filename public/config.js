@@ -11,5 +11,5 @@
  */
 window.FNCTION_CONFIG = {
   SUPABASE_URL: "https://meqtjzmpesakaoitonav.supabase.co",
-  SUPABASE_ANON_KEY: "PASTE_YOUR_PUBLISHABLE_KEY_HERE",
+  SUPABASE_ANON_KEY: "sb_publishable_Jiuq3eZu60BEIioCNGLxfg_iXhicD4l",
 };
