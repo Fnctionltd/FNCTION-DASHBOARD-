@@ -23,15 +23,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # There is deliberately no actions/configure-pages step: a workflow token
+      # is not permitted to create the Pages site, and basePath is set below
+      # rather than discovered, so the step would add a failure point and
+      # nothing else. Pages must be switched on once in Settings -> Pages, with
+      # the source set to GitHub Actions.
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
-      - name: Turn on GitHub Pages for this repository
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - run: npm ci
 
