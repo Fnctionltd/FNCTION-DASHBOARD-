@@ -3,15 +3,11 @@ name: Deploy dashboard to GitHub Pages
 on:
   push:
     branches: [claude/fnction-business-dashboard-6sdlkm]
-  # Lets the site be rebuilt from the Actions tab without a code change.
   workflow_dispatch:
 
-# Needed to push the built site to the gh-pages branch.
 permissions:
   contents: write
 
-# Never let two deploys run at once, but let a queued one finish rather than
-# cancelling it, so the last push always ends up live.
 concurrency:
   group: deploy-pages
   cancel-in-progress: false
@@ -35,17 +31,25 @@ jobs:
           # A project Pages site is served from /<repo>/, not the domain root.
           NEXT_PUBLIC_BASE_PATH: /FNCTION-DASHBOARD-
 
-      # The site is published to a branch rather than through the Pages
-      # deployment API, because "Deploy from a branch" is the source this
-      # repository uses. gh-pages holds only generated output and is owned
-      # entirely by this workflow, so replacing it each time is correct — there
-      # is no history there worth keeping.
-      - name: Publish the built site to gh-pages
+      # The built site is published twice, on purpose:
+      #
+      #  1. to gh-pages, which is the tidy arrangement, and
+      #  2. into the root of this branch, because that is where this
+      #     repository's Pages source currently points.
+      #
+      # Publishing to the branch root mixes generated files in with the source,
+      # which is not how this would be left long term. It is here so the site
+      # works whichever of the two sources Pages is set to. Once Pages is
+      # pointed at gh-pages, the second step and the files it writes can be
+      # removed. .pages-manifest records exactly which paths it owns, so the
+      # cleanup is mechanical.
+      - name: Publish to gh-pages
         run: |
           set -euo pipefail
           test -f out/index.html
-          test -f out/.nojekyll   # stops Pages hiding the _next folder
-          cd out
+          test -f out/.nojekyll
+          rm -rf /tmp/site && cp -r out /tmp/site
+          cd /tmp/site
           git init -q
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -57,6 +61,38 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Where the site will appear
+      - name: Publish into this branch's root as well
         run: |
-          echo "https://fnctionltd.github.io/FNCTION-DASHBOARD-/" >> "$GITHUB_STEP_SUMMARY"
+          set -euo pipefail
+
+          # Remove whatever the previous run put here, so deleted pages do not
+          # linger and the manifest stays accurate.
+          if [ -f .pages-manifest ]; then
+            while IFS= read -r path; do
+              [ -n "$path" ] && rm -rf -- "$path"
+            done < .pages-manifest
+          fi
+
+          (cd out && find . -mindepth 1 -maxdepth 1 -printf '%P\n' | sort) > .pages-manifest
+          (cd out && tar cf - .) | tar xf - -C .
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "Site unchanged; nothing to publish."
+            exit 0
+          fi
+
+          # [skip ci] stops this push from starting another run of this
+          # workflow, which would otherwise loop forever.
+          git commit -q -m "Publish built site [skip ci]"
+          git push \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            HEAD:"${GITHUB_REF_NAME}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Where the site appears
+        run: echo "https://fnctionltd.github.io/FNCTION-DASHBOARD-/" >> "$GITHUB_STEP_SUMMARY"
