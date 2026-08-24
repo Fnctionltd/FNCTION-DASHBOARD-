@@ -10,6 +10,6 @@
  * NEVER put the service_role (secret) key here. It bypasses every rule.
  */
 window.FNCTION_CONFIG = {
-  SUPABASE_URL: "PASTE_YOUR_PROJECT_URL_HERE",
+  SUPABASE_URL: "https://meqtjzmpesakaoitonav.supabase.co",
   SUPABASE_ANON_KEY: "PASTE_YOUR_PUBLISHABLE_KEY_HERE",
 };
