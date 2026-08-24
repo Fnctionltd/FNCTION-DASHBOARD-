@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FNCTION — Business Dashboard</title>
+  <meta name="description" content="Single-screen operating view of FNCTION: distribution, finance, manufacturing and marketing." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230f1115'/><text y='68' x='50' text-anchor='middle' font-family='monospace' font-size='54' fill='%23e8e6e1'>F</text></svg>" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to dashboard</a>
+
+  <header class="masthead">
+    <div class="masthead__brand">
+      <span class="wordmark" id="brand">FNCTION</span>
+      <span class="tagline" id="tagline">Business Dashboard</span>
+    </div>
+    <div class="masthead__meta">
+      <span class="updated">Updated <time id="updated">—</time></span>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-live="polite">
+        <span aria-hidden="true" id="theme-icon">◐</span>
+        <span id="theme-label">Light</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main"></main>
+
+  <footer class="colophon">
+    <span>FNCTION operating view</span>
+    <span class="legend" aria-label="Status legend">
+      <span class="legend__item"><i class="dot dot--live"></i>On track</span>
+      <span class="legend__item"><i class="dot dot--progress"></i>In progress</span>
+      <span class="legend__item"><i class="dot dot--blocked"></i>Needs action</span>
+    </span>
+  </footer>
+
+  <script src="data/dashboard.js"></script>
+  <script src="assets/dashboard.js"></script>
+</body>
+</html>
