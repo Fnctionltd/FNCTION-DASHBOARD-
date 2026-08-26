@@ -59,13 +59,15 @@ export function Metric({
 }
 
 export function Button({
-  children, onClick, type = "button", variant = "ghost", disabled,
+  children, onClick, type = "button", variant = "ghost", disabled, ariaLabel,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
   type?: "button" | "submit";
   variant?: "ghost" | "solid" | "danger";
   disabled?: boolean;
+  /** Use when the visible label is too short to stand on its own. */
+  ariaLabel?: string;
 }) {
   const styles = {
     ghost: "border-line text-ink-dim hover:border-ink-faint hover:text-ink",
@@ -78,6 +80,7 @@ export function Button({
       type={type}
       onClick={onClick}
       disabled={disabled}
+      aria-label={ariaLabel}
       className={`rounded-full border px-3 py-1.5 font-mono text-xs uppercase tracking-[0.08em] transition-colors disabled:opacity-50 ${styles}`}
     >
       {children}

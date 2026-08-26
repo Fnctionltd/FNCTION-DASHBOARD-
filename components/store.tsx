@@ -8,13 +8,14 @@ import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import type { DashboardData } from "@/lib/types";
 
 type Table =
-  | "partners" | "orders" | "expenses" | "invoices"
+  | "partners" | "orders" | "partner_activations" | "expenses" | "invoices"
   | "manufacturing_items" | "marketing_channels" | "notes";
 
 /** Which slice of state each table's rows live in. */
 const TABLE_KEY: Record<Table, keyof DashboardData> = {
   partners: "partners",
   orders: "orders",
+  partner_activations: "activations",
   expenses: "expenses",
   invoices: "invoices",
   manufacturing_items: "items",
@@ -58,6 +59,8 @@ function sortRows(key: keyof DashboardData, rows: Row[]): Row[] {
       return [...rows].sort(by("created_at", -1));
     case "orders":
       return [...rows].sort(by("ordered_on", -1));
+    case "activations":
+      return [...rows].sort(by("happened_on", -1));
     case "expenses":
       return [...rows].sort(by("spent_on", -1));
     case "invoices":

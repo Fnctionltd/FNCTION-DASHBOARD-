@@ -16,6 +16,8 @@ export type Partner = {
   stage: string | null;
   needs_follow_up: boolean;
   next_action: string | null;
+  /** Trade margin as a percentage, e.g. 42.5 */
+  margin_percent: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -28,6 +30,18 @@ export type Order = {
   description: string | null;
   amount_pence: number;
   status: string;
+  created_at: string;
+};
+
+export type Activation = {
+  id: string;
+  partner_id: string;
+  happened_on: string;
+  title: string;
+  channel: string | null;
+  status: string;
+  spend_pence: number | null;
+  notes: string | null;
   created_at: string;
 };
 
@@ -93,6 +107,7 @@ export type DashboardData = {
   profiles: Profile[];
   partners: Partner[];
   orders: Order[];
+  activations: Activation[];
   expenses: Expense[];
   invoices: Invoice[];
   suppliers: ManufacturingSupplier[];
