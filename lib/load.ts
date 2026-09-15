@@ -9,9 +9,10 @@ export async function loadDashboard(
   supabase: SupabaseClient
 ): Promise<{ data: DashboardData } | { error: string }> {
   const [
-    profiles, partners, orders, activations, expenses, invoices, suppliers, items, channels, notes,
+    profiles, tasks, partners, orders, activations, expenses, invoices, suppliers, items, channels, notes,
   ] = await Promise.all([
     supabase.from("profiles").select("id, display_name"),
+    supabase.from("tasks").select("*").order("created_at"),
     supabase.from("partners").select("*").order("name"),
     supabase.from("orders").select("*").order("ordered_on", { ascending: false }),
     supabase.from("partner_activations").select("*").order("happened_on", { ascending: false }),
@@ -24,7 +25,7 @@ export async function loadDashboard(
   ]);
 
   const failed = [
-    profiles, partners, orders, activations, expenses, invoices, suppliers, items, channels, notes,
+    profiles, tasks, partners, orders, activations, expenses, invoices, suppliers, items, channels, notes,
   ].find((result) => result.error);
 
   if (failed?.error) return { error: failed.error.message };
@@ -32,6 +33,7 @@ export async function loadDashboard(
   return {
     data: {
       profiles: profiles.data ?? [],
+      tasks: tasks.data ?? [],
       partners: partners.data ?? [],
       orders: orders.data ?? [],
       activations: activations.data ?? [],

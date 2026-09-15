@@ -1,6 +1,7 @@
 "use client";
 
 import { StoreProvider, useStore } from "@/components/store";
+import { Tasks } from "@/components/sections/tasks";
 import { Distribution } from "@/components/sections/distribution";
 import { Finance } from "@/components/sections/finance";
 import { Manufacturing } from "@/components/sections/manufacturing";
@@ -48,6 +49,7 @@ function Shell({ userName }: { userName: string }) {
       )}
 
       <main className="grid flex-1 auto-rows-max grid-cols-1 gap-5 px-5 py-6 sm:px-10 lg:grid-cols-12">
+        <Tasks />
         <Distribution />
         <Finance />
         <Manufacturing />

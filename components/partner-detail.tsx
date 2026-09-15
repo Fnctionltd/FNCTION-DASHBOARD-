@@ -139,6 +139,17 @@ export function PartnerDetail({ partner, onClose }: { partner: Partner; onClose:
           </div>
         </Section>
 
+        {isFuture && (
+          <Section title="Signed them up?">
+            <p className="mb-3 text-sm text-ink-dim">
+              Moving them across keeps their notes, orders and activations, and
+              clears the pipeline stage.
+            </p>
+            <Button variant="solid" onClick={() => set({ type: "existing", stage: null })}>
+              Move to existing partners
+            </Button>
+          </Section>
+        )}
         <Section
           title="Orders"
           action={
@@ -219,7 +230,10 @@ export function PartnerDetail({ partner, onClose }: { partner: Partner; onClose:
           <Notes notes={notes} parent={{ partner_id: partner.id }} label={partner.name} />
         </Section>
 
-        <div className="mt-8 border-t border-line pt-4">
+        <div className="mt-8 flex flex-wrap gap-2 border-t border-line pt-4">
+          {!isFuture && (
+            <Button onClick={() => set({ type: "future" })}>Move back to future</Button>
+          )}
           <Button
             variant="danger"
             onClick={() => {

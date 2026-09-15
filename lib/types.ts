@@ -45,6 +45,16 @@ export type Activation = {
   created_at: string;
 };
 
+export type Task = {
+  id: string;
+  title: string;
+  done: boolean;
+  done_at: string | null;
+  done_by: string | null;
+  created_by: string | null;
+  created_at: string;
+};
+
 export type Expense = {
   id: string;
   spent_on: string;
@@ -105,6 +115,7 @@ export type Note = {
 
 export type DashboardData = {
   profiles: Profile[];
+  tasks: Task[];
   partners: Partner[];
   orders: Order[];
   activations: Activation[];
